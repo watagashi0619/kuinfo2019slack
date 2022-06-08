@@ -7,10 +7,6 @@ import time
 import boto3
 import requests
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
 
 class Chrome:
@@ -76,15 +72,13 @@ def lambda_handler(event, context):
         "bot_token"
     ]
 
-    # JST = datetime.timezone(datetime.timedelta(hours=+9), "JST")
-
     ## KULASIS
 
     driver.find_element_by_id("username").send_keys(ECS_ACCOUNT["ecs-id"])
     driver.find_element_by_id("password").send_keys(ECS_ACCOUNT["password"])
     driver.find_element_by_name("_eventId_proceed").click()
 
-    ### 全学生向け共通掲示板
+    ##### 全学生向け共通掲示板
 
     # 重複確認
 
@@ -95,9 +89,6 @@ def lambda_handler(event, context):
     response = requests.get(HISTORY_API_URL, params=payload)
     json_data = response.json()
     history_link_list = []
-    # timzone反映されないっぽい
-    # divide_time=(datetime.datetime(dt_now.year,dt_now.month, dt_now.day,0,0,0)).timestamp()
-    # ので24時間前から見るにした
     divide_time = (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
 
     print("-----slack履歴確認開始-----")
@@ -110,7 +101,6 @@ def lambda_handler(event, context):
                         item["attachments"][0]["fallback"],
                         item["attachments"][0]["title_link"],
                     )
-                    # history_list.append(item["attachments"][0]["fallback"])
                     history_link_list.append(item["attachments"][0]["title_link"])
                 except:
                     print("*****")
@@ -147,17 +137,13 @@ def lambda_handler(event, context):
     for link, title in zip(information_details_link, information_title):
         if "https://www.k.kyoto-u.ac.jp/student/la/information_detail" in link:
             driver.get(link)
-            # title = driver.find_element_by_class_name("panel-heading").text
             table_item = driver.find_element_by_class_name(
                 "table"
             ).find_elements_by_tag_name("tr")
-            # classification = table_item[1].find_elements_by_tag_name("td")[1].text
-            # title = "[" + classification + "] " + title
             text = table_item[3].find_elements_by_tag_name("td")[0].text
         else:
             text = link
 
-        # if not title in history_list:
         if not link in history_link_list:
             new_list += [title]
 
@@ -242,9 +228,6 @@ def lambda_handler(event, context):
     response = requests.get(HISTORY_API_URL, params=payload)
     json_data = response.json()
     history_link_list = []
-    # timzone反映されないっぽい
-    # divide_time=(datetime.datetime(dt_now.year,dt_now.month, dt_now.day,0,0,0)).timestamp()
-    # ので24時間前から見るにした
     divide_time = (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
 
     print("-----slack履歴確認開始-----")
