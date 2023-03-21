@@ -80,7 +80,7 @@ def lambda_handler(event, context):
 
     # 大学院入学前後の暫定処理
     if "shibboleth_login" in driver.current_url:
-        driver.find_element_by_class_name("login-button")[0].click()
+        driver.find_element_by_class_name("login-button").click()
 
     ##### 全学生向け共通掲示板
 
