@@ -78,6 +78,10 @@ def lambda_handler(event, context):
     driver.find_element_by_id("password").send_keys(ECS_ACCOUNT["password"])
     driver.find_element_by_name("_eventId_proceed").click()
 
+    # 大学院入学前後の暫定処理
+    if "shibboleth_login" in driver.current_url:
+        driver.find_element_by_class_name("login-button")[0].click()
+
     ##### 全学生向け共通掲示板
 
     # 重複確認
