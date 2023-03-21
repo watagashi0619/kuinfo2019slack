@@ -381,11 +381,7 @@ def lambda_handler(event, context):
                     ),
                     "icon_emoji": u":books:",
                 }
-                requests.post(
-                    url=UPLOAD_API_URL,
-                    params=param,
-                    files=files,
-                )
+                requests.post(POST_API_URL, data=data)
 
     if new_list == []:
         print("新しいお知らせはありません。")
