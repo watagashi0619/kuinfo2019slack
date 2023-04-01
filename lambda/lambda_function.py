@@ -78,10 +78,6 @@ def lambda_handler(event, context):
     driver.find_element_by_id("password").send_keys(ECS_ACCOUNT["password"])
     driver.find_element_by_name("_eventId_proceed").click()
 
-    # 大学院入学前後の暫定処理
-    if "shibboleth_login" in driver.current_url:
-        driver.find_element_by_class_name("login-button").click()
-
     ##### 全学生向け共通掲示板
 
     # 重複確認
@@ -139,7 +135,7 @@ def lambda_handler(event, context):
             information_title.append(item.find_element_by_tag_name("a").text)
 
     for link, title in zip(information_details_link, information_title):
-        if "https://www.k.kyoto-u.ac.jp/student/la/information_detail" in link:
+        if "information_detail" in link:
             driver.get(link)
             table_item = driver.find_element_by_class_name(
                 "table"
@@ -152,8 +148,8 @@ def lambda_handler(event, context):
             new_list += [title]
 
             if (
-                not "https://www.k.kyoto-u.ac.jp/student/la/information_detail" in link
-            ) or (table_item[4].find_elements_by_tag_name("td")[0].text == ""):
+                not "information_detail" in link
+            ) or (len(table_item)>4 and table_item[4].find_elements_by_tag_name("td")[0].text == ""):
                 data = {
                     "token": TOKEN,
                     "channel": CHANNEL_ID_KULASIS_LA,
@@ -221,7 +217,7 @@ def lambda_handler(event, context):
         for item in new_list:
             print(item)
 
-    ##### 工学部
+    ##### 情報学研究科
 
     # 重複確認
 
@@ -254,7 +250,7 @@ def lambda_handler(event, context):
 
     new_list = []
 
-    # 工学部掲示板
+    # 情報学研究科掲示板
     driver.command_executor._commands["send_command"] = (
         "POST",
         "/session/$sessionId/chromium/send_command",
@@ -265,13 +261,13 @@ def lambda_handler(event, context):
     }
     driver.execute("send_command", params=params)
 
-    print("-----工学部掲示板-----")
+    print("-----情報学研究科掲示板-----")
 
     today = (
         str(dt_now.year) + "/" + str(dt_now.month) + "/" + "{:02d}".format(dt_now.day)
     )
 
-    notice_t = "https://www.k.kyoto-u.ac.jp/student/u/t/notice/general"
+    notice_t = "https://www.k.kyoto-u.ac.jp/student/g/i/notice/general"
     driver.get(notice_t)
 
     report_details_link = []
@@ -279,15 +275,10 @@ def lambda_handler(event, context):
         "no_scroll_list"
     ).find_elements_by_tag_name("tr")
 
-    for item in table[2:-2]:
-        target = item.find_elements_by_tag_name("td")[1].text.split("/")
-        if (
-            (target[0] == "情報学" or target[0] == "全")
-            and (target[2] == "全" or ("4" in target[2]))
-        ) and (today in item.find_elements_by_tag_name("td")[3].text):
-            report_details_link.append(
-                item.find_element_by_tag_name("a").get_attribute("href")
-            )
+    for item in table[2:-1][::-1]:
+        report_details_link.append(
+            item.find_element_by_tag_name("a").get_attribute("href")
+        )
 
     for link in report_details_link:
         driver.get(link)
@@ -310,7 +301,7 @@ def lambda_handler(event, context):
                 data = {
                     "token": TOKEN,
                     "channel": CHANNEL_ID_KULASIS_UT,
-                    "username": u"工学部教務・厚生情報",
+                    "username": u"情報学研究科教務・厚生情報",
                     "attachments": json.dumps(
                         [
                             {
@@ -347,7 +338,7 @@ def lambda_handler(event, context):
                             param = {
                                 "token": TOKEN,
                                 "channels": CHANNEL_ID_KULASIS_UT,
-                                "username": u"工学部教務・厚生情報",
+                                "username": u"情報学研究科教務・厚生情報",
                             }
                             requests.post(
                                 url=UPLOAD_API_URL,
@@ -362,7 +353,7 @@ def lambda_handler(event, context):
                 data = {
                     "token": TOKEN,
                     "channel": CHANNEL_ID_KULASIS_UT,
-                    "username": u"工学部教務・厚生情報",
+                    "username": u"情報学研究科教務・厚生情報",
                     "attachments": json.dumps(
                         [
                             {
