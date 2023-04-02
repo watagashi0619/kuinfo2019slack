@@ -276,9 +276,10 @@ def lambda_handler(event, context):
     ).find_elements_by_tag_name("tr")
 
     for item in table[2:-1][::-1]:
-        report_details_link.append(
-            item.find_element_by_tag_name("a").get_attribute("href")
-        )
+        if today in item.find_elements_by_tag_name("td")[3].text:
+            report_details_link.append(
+                item.find_element_by_tag_name("a").get_attribute("href")
+            )
 
     for link in report_details_link:
         driver.get(link)
